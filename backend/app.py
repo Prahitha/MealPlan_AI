@@ -2,17 +2,25 @@ from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS, cross_origin
 from config import Config
 from openai import OpenAI
+from PIL import Image
+from google.cloud import vision
+from google.cloud.vision_v1 import types
+from io import BytesIO
 import threading
 import json
 import re
+import os
 
 app = Flask(__name__)
 CORS(app)
 
+# Set the OpenAI API key from the configuration
 app.config.from_object(Config)
 client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
 
-# Set the OpenAI API key from the configuration
+# Ensure you set the path to your GCP service account key JSON file
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "backend/vision_api_key.json"
+
 
 # Mutex for thread safety
 thread_lock = threading.Lock()
@@ -42,7 +50,171 @@ def generate_text():
         days_of_week = data.get('days_of_week', [])
         meals_for_the_day = data.get('meals_for_the_day', '')
 
-        generated_output = get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergies, family_size, cooking_time, days_of_week, meals_for_the_day)
+        generated_output = [
+                            {
+                                "day": "Monday",
+                                "meals": [
+                                {
+                                    "type": "Breakfast",
+                                    "dishName": "Yogurt Parfait with Fresh Fruits",
+                                    "ingredients": [
+                                    "Yogurt (2 cups)",
+                                    "Strawberries (1 cup, sliced)",
+                                    "Apples (1, diced)",
+                                    "Cereal (1 cup)"
+                                    ],
+                                    "recipe": [
+                                    "In individual bowls, layer yogurt, sliced strawberries, diced apples, and cereal.",
+                                    "Repeat the layers until the bowl is filled.",
+                                    "Serve immediately."
+                                    ],
+                                    "nutritionalInformation": {
+                                    "Calories": 300,
+                                    "Protein": 10,
+                                    "Carbohydrates": 45,
+                                    "Fat": 8,
+                                    "Fiber": 6
+                                    }
+                                },
+                                {
+                                    "type": "Lunch",
+                                    "dishName": "Spinach and Tomato Penne",
+                                    "ingredients": [
+                                    "Penne (2 cups, cooked)",
+                                    "Spinach (2 cups, chopped)",
+                                    "Tomatoes (2, diced)",
+                                    "Onions (1, chopped)",
+                                    "Garlic (2 cloves, minced)",
+                                    "Vegetable Stock (1 cup)",
+                                    "Cheese (1/2 cup, shredded)"
+                                    ],
+                                    "recipe": [
+                                    "In a pan, sauté onions and garlic until golden brown.",
+                                    "Add chopped spinach and diced tomatoes, cook until spinach wilts.",
+                                    "Pour in vegetable stock and let it simmer.",
+                                    "Toss in cooked penne and mix well.",
+                                    "Top with shredded cheese and let it melt.",
+                                    "Serve hot."
+                                    ],
+                                    "nutritionalInformation": {
+                                    "Calories": 400,
+                                    "Protein": 15,
+                                    "Carbohydrates": 60,
+                                    "Fat": 10,
+                                    "Fiber": 8
+                                    }
+                                }
+                                ]
+                            },
+                            {
+                                "day": "Tuesday",
+                                "meals": [
+                                {
+                                    "type": "Breakfast",
+                                    "dishName": "Apple Cinnamon Rice Pudding",
+                                    "ingredients": [
+                                    "Rice (1 cup, cooked)",
+                                    "Milk (2 cups)",
+                                    "Apples (2, grated)",
+                                    "Cinnamon (1 teaspoon)"
+                                    ],
+                                    "recipe": [
+                                    "In a saucepan, combine cooked rice and milk. Bring to a simmer.",
+                                    "Add grated apples and cinnamon, stir well.",
+                                    "Simmer until the mixture thickens.",
+                                    "Remove from heat and let it cool slightly before serving."
+                                    ],
+                                    "nutritionalInformation": {
+                                    "Calories": 350,
+                                    "Protein": 9,
+                                    "Carbohydrates": 60,
+                                    "Fat": 7,
+                                    "Fiber": 4
+                                    }
+                                },
+                                {
+                                    "type": "Lunch",
+                                    "dishName": "Vegetable Stir-Fry with Rice Noodles",
+                                    "ingredients": [
+                                    "Rice Noodles (2 cups, cooked)",
+                                    "Spring Mix (2 cups)",
+                                    "Carrots (2, julienned)",
+                                    "Scallions (4, chopped)",
+                                    "Soy Sauce (2 tablespoons)"
+                                    ],
+                                    "recipe": [
+                                    "In a wok, stir-fry carrots and scallions until slightly tender.",
+                                    "Add spring mix and cooked rice noodles, stir-fry for a few more minutes.",
+                                    "Pour soy sauce over the mixture and toss until well combined.",
+                                    "Serve hot."
+                                    ],
+                                    "nutritionalInformation": {
+                                    "Calories": 380,
+                                    "Protein": 10,
+                                    "Carbohydrates": 70,
+                                    "Fat": 5,
+                                    "Fiber": 6
+                                    }
+                                }
+                                ]
+                            },
+                            {
+                                "day": "Wednesday",
+                                "meals": [
+                                {
+                                    "type": "Breakfast",
+                                    "dishName": "Lemon Ricotta Pancakes",
+                                    "ingredients": [
+                                    "Cereal (1 cup, crushed)",
+                                    "Milk (1 cup)",
+                                    "Lemons (2, zest and juice)",
+                                    "Eggs (2)",
+                                    "Cheese (1/2 cup, ricotta)"
+                                    ],
+                                    "recipe": [
+                                    "In a bowl, mix crushed cereal, milk, lemon zest, lemon juice, eggs, and ricotta cheese.",
+                                    "Heat a griddle and pour batter to make pancakes.",
+                                    "Cook until bubbles form, flip, and cook the other side.",
+                                    "Serve with a drizzle of honey."
+                                    ],
+                                    "nutritionalInformation": {
+                                    "Calories": 380,
+                                    "Protein": 15,
+                                    "Carbohydrates": 45,
+                                    "Fat": 15,
+                                    "Fiber": 3
+                                    }
+                                },
+                                {
+                                    "type": "Lunch",
+                                    "dishName": "Tomato and Spinach Salad with Walnut Dressing",
+                                    "ingredients": [
+                                    "Spinach (3 cups)",
+                                    "Tomatoes (2, sliced)",
+                                    "Walnuts (1/4 cup, chopped)",
+                                    "Olive Oil (2 tablespoons)",
+                                    "Lemon Juice (1 tablespoon)",
+                                    "Cilantro (2 tablespoons, chopped)"
+                                    ],
+                                    "recipe": [
+                                    "In a large bowl, combine spinach and sliced tomatoes.",
+                                    "In a small bowl, whisk together olive oil, lemon juice, and chopped cilantro.",
+                                    "Drizzle the dressing over the salad and toss gently.",
+                                    "Sprinkle chopped walnuts on top before serving."
+                                    ],
+                                    "nutritionalInformation": {
+                                    "Calories": 320,
+                                    "Protein": 8,
+                                    "Carbohydrates": 15,
+                                    "Fat": 25,
+                                    "Fiber": 5
+                                    }
+                                }
+                                ]
+                            }
+                            ]
+
+        # generated_output = get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergies, family_size, cooking_time, days_of_week, meals_for_the_day)
 
         return jsonify({'status': 'success', 'formatted_output': generated_output})
 
@@ -133,6 +305,8 @@ def process_output(text, days_of_week, meals_for_the_day):
 
     if current_meal:
         formatted_output.append(current_meal)
+
+    print(formatted_output)
 
     return formatted_output
 
@@ -294,7 +468,55 @@ def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergie
     meals_for_the_day = ['Breakfast', 'Lunch']
 
     formatted_plan = process_output(generated_plan, days_of_week, meals_for_the_day)
+    print(formatted_plan)
     return generated_plan
+
+
+@app.route('/upload', methods=['POST'])
+@cross_origin(origins='*')
+def upload_image():
+    print(request.files)
+    if 'image' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files.get('image')
+    filename = file.filename
+
+    if filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    if file:
+        # Get the root directory of the Flask app
+        root_directory = os.path.dirname(os.path.abspath(__file__))
+
+        # Specify the path where you want to save the file in the root directory
+        upload_path = os.path.join(root_directory, filename)
+
+        # Save the file
+        file.save(upload_path)
+        return 'File uploaded successfully.'
+
+
+    if file:
+        try:
+            # Use Google Cloud Vision API for text extraction
+            client = vision.ImageAnnotatorClient()
+            image_content = file.read()
+            image = types.Image(content=image_content)
+
+            response = client.text_detection(image=image)
+            texts = response.text_annotations
+
+            recognized_text = ""
+            for text in texts:
+                recognized_text += text.description + '\n'
+
+            # Return the recognized text
+            print(recognized_text)
+            return jsonify({'recognized_text': recognized_text.strip()})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
