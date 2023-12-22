@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function App() {
@@ -23,7 +23,12 @@ function App() {
         meals_for_the_day: mealsForTheDay,
       });
 
+      console.log('API Response:', response.data);
+
       setMealSuggestions(response.data);
+
+      console.log('mealSuggestions updated:', mealSuggestions);
+
     } catch (error) {
       console.error('Error generating meal suggestions:', error);
     }
@@ -70,17 +75,30 @@ function App() {
       <button onClick={generateMealSuggestions}>Generate Meal Suggestions</button>
 
       <h2>Generated Meal Suggestions</h2>
-      <ul>
-        {mealSuggestions.map((suggestion, index) => (
-          <li key={index}>
-            <strong>{suggestion.day} - {suggestion.meal_type}</strong><br />
-            Dish: {suggestion.dish_name}<br />
-            Ingredients: {suggestion.ingredients.join(', ')}<br />
-            Recipe: {suggestion.recipe}<br />
-            Nutritional Information: Calories - {suggestion.nutritional_info.calories}, Protein - {suggestion.nutritional_info.protein}, Carbs - {suggestion.nutritional_info.carbs}, Fat - {suggestion.nutritional_info.fat}<br />
-          </li>
-        ))}
-      </ul>
+      {mealSuggestions && mealSuggestions.map((day, index) => (
+        <div key={index}>
+          <h3>{day.Day}</h3>
+          {day.Meals.map((meal, mealIndex) => (
+            <div key={mealIndex}>
+              <strong>{meal['Meal Type']} - {meal['Name of the dish']}</strong><br />
+              <p>Ingredients:</p>
+              <ul>
+                {meal['Ingredients used with quantity required'].map((ingredient, ingredientIndex) => (
+                  <li key={ingredientIndex}>{ingredient.Ingredient} - {ingredient.Quantity}</li>
+                ))}
+              </ul>
+              <p>Recipe:</p>
+              <ul>
+                {meal['Recipe in steps'].map((step, stepIndex) => (
+                  <li key={stepIndex}>{step}</li>
+                ))}
+              </ul>
+              <p>Nutritional Information:</p>
+              <p>Calories - {meal['Nutritional Information'].Calories}, Protein - {meal['Nutritional Information'].Protein}, Carbs - {meal['Nutritional Information'].Carbohydrates}, Fat - {meal['Nutritional Information'].Fat}</p>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
