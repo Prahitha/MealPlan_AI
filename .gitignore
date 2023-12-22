@@ -1,4 +1,10 @@
 # .gitignore
 
+backend/__pycache__/
+
 # Virtual environment
 venv/
+
+# API keys
+keys.txt
+backend/config.py
