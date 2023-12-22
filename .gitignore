@@ -8,3 +8,4 @@ venv/
 # API keys
 keys.txt
 backend/config.py
+backend/vision_api_key.json

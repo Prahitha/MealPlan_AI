@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import ImageUploader from './ImageUploader';
 
 function App() {
   const [pantryItems, setPantryItems] = useState('');
@@ -10,6 +11,17 @@ function App() {
   const [daysOfWeek, setDaysOfWeek] = useState('');
   const [mealsForTheDay, setMealsForTheDay] = useState('');
   const [mealSuggestions, setMealSuggestions] = useState([]);
+  const [foodItems, setFoodItems] = useState([]);
+
+  useEffect(() => {
+    console.log('mealSuggestions updated:', mealSuggestions);
+  }, [mealSuggestions]);
+
+  const onFoodItemsReceived = (items) => {
+    const updatedPantryItems = [...pantryItems.split(','), ...items].join(', ');
+    setPantryItems(updatedPantryItems);
+    setFoodItems(items);
+  };
 
   const generateMealSuggestions = async () => {
     try {
@@ -24,11 +36,7 @@ function App() {
       });
 
       console.log('API Response:', response.data);
-
       setMealSuggestions(response.data);
-
-      console.log('mealSuggestions updated:', mealSuggestions);
-
     } catch (error) {
       console.error('Error generating meal suggestions:', error);
     }
@@ -36,6 +44,18 @@ function App() {
 
   return (
     <div>
+      <ImageUploader onFoodItemsReceived={onFoodItemsReceived} />
+      <label>
+        Pantry Items:
+        <input type="text" value={pantryItems} onChange={(e) => setPantryItems(e.target.value)} />
+      </label>
+      <h2>Food Items from Image</h2>
+      <ul>
+        {foodItems.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+
       <h1>Meal Planner</h1>
       <label>
         Pantry Items:
@@ -75,26 +95,26 @@ function App() {
       <button onClick={generateMealSuggestions}>Generate Meal Suggestions</button>
 
       <h2>Generated Meal Suggestions</h2>
-      {mealSuggestions && mealSuggestions.map((day, index) => (
+      {mealSuggestions && Array.isArray(mealSuggestions) && mealSuggestions?.map((day, index) => (
         <div key={index}>
-          <h3>{day.Day}</h3>
-          {day.Meals.map((meal, mealIndex) => (
+          <h3>{day.day}</h3>
+          {day.meals.map((meal, mealIndex) => (
             <div key={mealIndex}>
-              <strong>{meal['Meal Type']} - {meal['Name of the dish']}</strong><br />
+              <strong>{meal['type']} - {meal['dishName']}</strong><br />
               <p>Ingredients:</p>
               <ul>
-                {meal['Ingredients used with quantity required'].map((ingredient, ingredientIndex) => (
+                {meal['ingredients'].map((ingredient, ingredientIndex) => (
                   <li key={ingredientIndex}>{ingredient.Ingredient} - {ingredient.Quantity}</li>
                 ))}
               </ul>
               <p>Recipe:</p>
               <ul>
-                {meal['Recipe in steps'].map((step, stepIndex) => (
+                {meal['recipe'].map((step, stepIndex) => (
                   <li key={stepIndex}>{step}</li>
                 ))}
               </ul>
               <p>Nutritional Information:</p>
-              <p>Calories - {meal['Nutritional Information'].Calories}, Protein - {meal['Nutritional Information'].Protein}, Carbs - {meal['Nutritional Information'].Carbohydrates}, Fat - {meal['Nutritional Information'].Fat}</p>
+              <p>Calories - {meal['nutritionalInformation'].Calories}, Protein - {meal['nutritionalInformation'].Protein}, Carbs - {meal['nutritionalInformation'].Carbohydrates}, Fat - {meal['nutritionalInformation'].Fat}</p>
             </div>
           ))}
         </div>
