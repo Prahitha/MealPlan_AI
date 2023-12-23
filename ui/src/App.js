@@ -32,7 +32,7 @@ function App() {
         family_size: familySize,
         cooking_time: cookingTime,
         days_of_week: daysOfWeek.split(',').map(day => day.trim()),
-        meals_for_the_day: mealsForTheDay,
+        meals_for_the_day: mealsForTheDay.split(',').map(meal => meal.trim()),
       });
 
       console.log('API Response:', response.data);

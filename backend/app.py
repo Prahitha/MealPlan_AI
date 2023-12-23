@@ -238,8 +238,7 @@ def remove_words(text, words_to_remove):
 def process_output(text, days_of_week, meals_for_the_day):
     words_to_remove = ["Meal Type", "Name of the Dish", "Cuisine"]
     text = remove_words(text, words_to_remove)
-    print(meals_for_the_day)
-    print(days_of_week)
+
     print(text)
 
     # Split the text into lines, trim each line, and remove empty lines
@@ -257,14 +256,13 @@ def process_output(text, days_of_week, meals_for_the_day):
 
     # Iterate through the lines
     for i in range(len(lines)):
-        print(lines[i])
-        # print(formatted_output)
         # Check if the line matches any day
         if any(day in lines[i] for day in days_of_week):
             if current_meal:
                 meal_dict = {}
-                meal_dict['meal_type'] = meal_type,
-                meal_dict['dish'] = dish,
+                meal_dict['type'] = meal_type,
+                meal_dict['dishName'] = dish,
+                meal_dict['cuisine'] = cuisine,
                 meal_dict['ingredients'] = ingredients,
                 meal_dict['recipe'] = recipe,
                 meal_dict['nutritionalInformation'] = nutritionalInformation
@@ -275,7 +273,6 @@ def process_output(text, days_of_week, meals_for_the_day):
             current_day = next(day for day in days_of_week if day in lines[i])
             current_meal = {'day': current_day, 'meals': []}
             meals = 0
-            print(formatted_output)
 
         # Check if the line contains the word "Ingredients"
         elif "Ingredients" in lines[i]:
@@ -306,7 +303,7 @@ def process_output(text, days_of_week, meals_for_the_day):
 
         # Add the line to the ingredients if current_day, current_meal and inside_ingredients are set
         elif current_meal and inside_ingredients:
-            ingredients.append(lines[i])
+            ingredients.append(lines[i].replace('-', '').strip())
 
         # Add the line to the recipe if current_day, current_meal and inside_recipe are set
         elif current_meal and inside_recipe:
@@ -315,10 +312,10 @@ def process_output(text, days_of_week, meals_for_the_day):
         elif current_meal and inside_nutrition:
             nutritionalInformation.append(lines[i])
 
-        if meals > 0 and any(meal in lines[i + 1] for meal in meals_for_the_day):
+        if (meals > 0 and i + 1 < len(lines) and any(meal in lines[i + 1] for meal in meals_for_the_day)) or (i == len(lines)):
             meal_dict = {}
-            meal_dict['meal_type'] = meal_type,
-            meal_dict['dish'] = dish,
+            meal_dict['type'] = meal_type,
+            meal_dict['dishName'] = dish,
             meal_dict['cuisine'] = cuisine,
             meal_dict['ingredients'] = ingredients,
             meal_dict['recipe'] = recipe,
@@ -328,8 +325,6 @@ def process_output(text, days_of_week, meals_for_the_day):
 
     if current_meal:
         formatted_output.append(current_meal)
-
-    print(formatted_output)
 
     return formatted_output
 
@@ -345,7 +340,7 @@ def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergie
                 Family size: {family_size}
                 Cooking time: {cooking_time}
                 Days of Week: {', '.join(days_of_week)}
-                Meals for the day: {meals_for_the_day}
+                Meals for the day: {', '.join(meals_for_the_day)}
                 Note: Do not shorten the response. I need the plan for all the days requested. Dietary preferences and allergies are to be strictly considered. 
                 I also want to only use the pantry items listed and no extra items unless they are common like salt, pepper, oil etc. 
                 For any extra ingredients that are absolutely necessary, mention them in bold.
@@ -493,7 +488,7 @@ def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergie
 
     formatted_plan = process_output(generated_plan, days_of_week, meals_for_the_day)
     print(formatted_plan)
-    return generated_plan
+    return formatted_plan
 
 
 @app.route('/upload', methods=['POST'])
