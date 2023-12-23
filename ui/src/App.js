@@ -45,17 +45,6 @@ function App() {
   return (
     <div>
       <ImageUploader onFoodItemsReceived={onFoodItemsReceived} />
-      <label>
-        Pantry Items:
-        <input type="text" value={pantryItems} onChange={(e) => setPantryItems(e.target.value)} />
-      </label>
-      <h2>Food Items from Image</h2>
-      <ul>
-        {foodItems.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-
       <h1>Meal Planner</h1>
       <label>
         Pantry Items:
@@ -95,7 +84,7 @@ function App() {
       <button onClick={generateMealSuggestions}>Generate Meal Suggestions</button>
 
       <h2>Generated Meal Suggestions</h2>
-      {mealSuggestions && Array.isArray(mealSuggestions) && mealSuggestions?.map((day, index) => (
+      {mealSuggestions.formatted_output && Array.isArray(mealSuggestions.formatted_output) && mealSuggestions.formatted_output?.map((day, index) => (
         <div key={index}>
           <h3>{day.day}</h3>
           {day.meals.map((meal, mealIndex) => (
@@ -104,7 +93,7 @@ function App() {
               <p>Ingredients:</p>
               <ul>
                 {meal['ingredients'].map((ingredient, ingredientIndex) => (
-                  <li key={ingredientIndex}>{ingredient.Ingredient} - {ingredient.Quantity}</li>
+                  <li key={ingredientIndex}>{ingredient}</li>
                 ))}
               </ul>
               <p>Recipe:</p>

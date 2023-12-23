@@ -4,12 +4,12 @@ from config import Config
 from openai import OpenAI
 from PIL import Image
 from google.cloud import vision
-from google.cloud.vision_v1 import types
-from io import BytesIO
 import threading
-import json
 import re
 import os
+import requests
+import json
+
 
 app = Flask(__name__)
 CORS(app)
@@ -17,9 +17,10 @@ CORS(app)
 # Set the OpenAI API key from the configuration
 app.config.from_object(Config)
 client = OpenAI(api_key=app.config['OPENAI_API_KEY'])
+food_api = app.config['API_NINJAS_FOOD']
 
 # Ensure you set the path to your GCP service account key JSON file
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "backend/vision_api_key.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"vision_api_key.json"
 
 
 # Mutex for thread safety
@@ -57,6 +58,7 @@ def generate_text():
                                 {
                                     "type": "Breakfast",
                                     "dishName": "Yogurt Parfait with Fresh Fruits",
+                                    "cusine": "American",
                                     "ingredients": [
                                     "Yogurt (2 cups)",
                                     "Strawberries (1 cup, sliced)",
@@ -79,6 +81,7 @@ def generate_text():
                                 {
                                     "type": "Lunch",
                                     "dishName": "Spinach and Tomato Penne",
+                                    "cuisine": "Italian",
                                     "ingredients": [
                                     "Penne (2 cups, cooked)",
                                     "Spinach (2 cups, chopped)",
@@ -112,6 +115,7 @@ def generate_text():
                                 {
                                     "type": "Breakfast",
                                     "dishName": "Apple Cinnamon Rice Pudding",
+                                    "cuisine": "Indian",
                                     "ingredients": [
                                     "Rice (1 cup, cooked)",
                                     "Milk (2 cups)",
@@ -135,6 +139,7 @@ def generate_text():
                                 {
                                     "type": "Lunch",
                                     "dishName": "Vegetable Stir-Fry with Rice Noodles",
+                                    "cuisine": "Chinese",
                                     "ingredients": [
                                     "Rice Noodles (2 cups, cooked)",
                                     "Spring Mix (2 cups)",
@@ -164,6 +169,7 @@ def generate_text():
                                 {
                                     "type": "Breakfast",
                                     "dishName": "Lemon Ricotta Pancakes",
+                                    "cuisine": "American",
                                     "ingredients": [
                                     "Cereal (1 cup, crushed)",
                                     "Milk (1 cup)",
@@ -188,6 +194,7 @@ def generate_text():
                                 {
                                     "type": "Lunch",
                                     "dishName": "Tomato and Spinach Salad with Walnut Dressing",
+                                    "cuisine": "Greek",
                                     "ingredients": [
                                     "Spinach (3 cups)",
                                     "Tomatoes (2, sliced)",
@@ -222,7 +229,17 @@ def generate_text():
         return jsonify({'error': str(e)})
     
 
+def remove_words_case_insensitive(text, words_to_remove):
+    text_lower = text.lower()
+    for word in words_to_remove:
+        text_lower = text_lower.replace(word.lower(), '')
+    return text_lower
+    
+
 def process_output(text, days_of_week, meals_for_the_day):
+    words_to_remove = ["Day", "Meal Type", "Name of the Dish", "Cuisine"]
+    text = remove_words_case_insensitive(text, words_to_remove)
+
     # Split the text into lines, trim each line, and remove empty lines
     lines = [line.strip() for line in text.split('\n') if line.strip()]
 
@@ -276,6 +293,7 @@ def process_output(text, days_of_week, meals_for_the_day):
         elif any(meal in lines[i] for meal in meals_for_the_day):
             meal_type = next(meal for meal in meals_for_the_day if meal in lines[i])
             dish = lines[i + 1]
+            cuisine = lines[i + 2]
             meals += 1
 
             ingredients = []
@@ -297,6 +315,7 @@ def process_output(text, days_of_week, meals_for_the_day):
             meal_dict = {}
             meal_dict['meal_type'] = meal_type,
             meal_dict['dish'] = dish,
+            meal_dict['cuisine'] = cuisine,
             meal_dict['ingredients'] = ingredients,
             meal_dict['recipe'] = recipe,
             meal_dict['nutritionalInformation'] = nutritionalInformation
@@ -330,6 +349,7 @@ def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergie
                 Day
                 Meal Type
                 Name of the Dish
+                Cuisine
                 Ingredients:
                 Ingredient1 (Quantity)
                 Recipe
@@ -475,48 +495,73 @@ def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergie
 @app.route('/upload', methods=['POST'])
 @cross_origin(origins='*')
 def upload_image():
-    print(request.files)
-    if 'image' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+    # if 'image' not in request.files:
+    #     return jsonify({'error': 'No file part'}), 400
 
-    file = request.files.get('image')
-    filename = file.filename
+    # file = request.files.get('image')
+    # filename = file.filename
 
-    if filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+    # if filename == '':
+    #     return jsonify({'error': 'No selected file'}), 400
     
-    if file:
-        # Get the root directory of the Flask app
-        root_directory = os.path.dirname(os.path.abspath(__file__))
+    # if file:
+    #     # Get the root directory of the Flask app
+    #     root_directory = os.path.dirname(os.path.abspath(__file__))
 
-        # Specify the path where you want to save the file in the root directory
-        upload_path = os.path.join(root_directory, filename)
+    #     # Specify the path where you want to save the file in the root directory
+    #     upload_path = os.path.join(root_directory, filename)
 
-        # Save the file
-        file.save(upload_path)
-        return 'File uploaded successfully.'
+    #     # Save the file
+    #     file.save(upload_path)
 
+    # if file:
+    #     try:
+    #         # Use Google Cloud Vision API for text extraction
+    #         vision_client = vision.ImageAnnotatorClient()
+            
+    #         with open(upload_path, "rb") as image_file:
+    #             content = image_file.read()
 
-    if file:
-        try:
-            # Use Google Cloud Vision API for text extraction
-            client = vision.ImageAnnotatorClient()
-            image_content = file.read()
-            image = types.Image(content=image_content)
+    #         image = vision.Image(content=content)
+    #         response = vision_client.text_detection(image=image)
+    #         texts = response.text_annotations
 
-            response = client.text_detection(image=image)
-            texts = response.text_annotations
+    #         recognized_text = ""
+    #         for text in texts:
+    #             recognized_text += text.description + '\n'
 
-            recognized_text = ""
-            for text in texts:
-                recognized_text += text.description + '\n'
+    #         # Use a regular expression to keep only alphabetic characters
+    #         cleaned_text = re.sub("[^a-zA-Z]", " ", recognized_text)
+            
+    #         # Remove extra spaces
+    #         cleaned_text = re.sub(' +', ' ', cleaned_text)
+
+    #         # Get food items using Nutrition API
+    #         food_items = extract_food_items(cleaned_text)
+    #         print(food_items)
+            
+            food_items = ['gluten free pasta', 'black beans', 'large eggs', 'zucchini', 'pink lady apple', 'pork loin', 'avocados', 'frozen peas', 'fries', 'beans', 'spinach', 'ham', 'turkey', 'tortilla', 'crushed tomatoes', 'strawberries']
 
             # Return the recognized text
-            print(recognized_text)
-            return jsonify({'recognized_text': recognized_text.strip()})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            return food_items
+        # except Exception as e:
+        #     return jsonify({'error': str(e)}), 500
+        
 
+def extract_food_items(text):
+    query = '"' + text + '"'
+    api_url = 'https://api.api-ninjas.com/v1/nutrition?query={}'.format(query)
+    response = requests.get(api_url, headers={'X-Api-Key': food_api})
+    
+    if response.status_code == requests.codes.ok:
+        item_names = set()
+        json_object = json.loads(response.content)
+        for item in json_object:
+            item_names.add(item['name'])
+        
+        return list(item_names)
+    else:
+        print("Error:", response.status_code, response.text)
 
 if __name__ == '__main__':
     app.run(debug=True)

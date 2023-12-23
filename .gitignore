@@ -1,4 +1,5 @@
 # .gitignore
+.DS_Store
 
 backend/__pycache__/
 

@@ -1,17 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { useDropzone } from 'react-dropzone';
 
 const ImageUploader = ({ onFoodItemsReceived }) => {
-  const [uploadedImage, setUploadedImage] = useState(null);
-
   const onDrop = async (acceptedFiles) => {
     const file = acceptedFiles[0];
 
     try {
       // Create a FormData object and append the image file
       const formData = new FormData();
-      console.log(file, file.name)
       formData.append("image", file);
       
       for (var key of formData.entries()) {
@@ -26,18 +23,9 @@ const ImageUploader = ({ onFoodItemsReceived }) => {
       });
 
       // Assuming the server responds with the recognized text
-      const recognizedText = response.data.recognized_text;
+      console.log(response.data)
+      onFoodItemsReceived(response.data);
 
-      // Handle the recognized text as needed
-      console.log('Recognized Text:', recognizedText);
-
-      // You may want to extract food items from the recognized text
-      // and pass them to onFoodItemsReceived function
-      const foodItems = extractFoodItemsFromRecognizedText(recognizedText);
-      onFoodItemsReceived(foodItems);
-
-      // Set the uploaded image for display
-      setUploadedImage(file);
     } catch (error) {
       console.error('Error uploading image:', error);
     }
@@ -55,7 +43,6 @@ const ImageUploader = ({ onFoodItemsReceived }) => {
         <input {...getInputProps()} />
         <p>Drag & drop an image here, or click to select one</p>
       </div>
-      {uploadedImage && <img src={URL.createObjectURL(uploadedImage)} alt="Uploaded" style={imageStyle} />}
     </div>
   );
 };
