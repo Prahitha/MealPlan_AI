@@ -239,7 +239,7 @@ def process_output(text, days_of_week, meals_for_the_day):
     words_to_remove = ["Meal Type", "Name of the Dish", "Cuisine"]
     text = remove_words(text, words_to_remove)
 
-    print(text)
+    print(days_of_week, meals_for_the_day)
 
     # Split the text into lines, trim each line, and remove empty lines
     lines = [line.strip() for line in text.split('\n') if line.strip()]
@@ -251,13 +251,14 @@ def process_output(text, days_of_week, meals_for_the_day):
     inside_recipe = False
     inside_nutrition = False
     meals = 0
+    nutrients = ['Calories', 'Fat', 'Carbohydrates', 'Fiber', 'Protein']
 
     formatted_output = []
 
     # Iterate through the lines
     for i in range(len(lines)):
         # Check if the line matches any day
-        if any(day in lines[i] for day in days_of_week):
+        if any(lines[i] in day for day in days_of_week):
             if current_meal:
                 meal_dict = {}
                 meal_dict['type'] = meal_type,
@@ -291,7 +292,7 @@ def process_output(text, days_of_week, meals_for_the_day):
             inside_nutrition = True
 
         # Check if the line matches any meal
-        elif any(meal in lines[i] for meal in meals_for_the_day):
+        elif any(lines[i] in meal for meal in meals_for_the_day):
             meal_type = next(meal for meal in meals_for_the_day if meal in lines[i])
             dish = lines[i + 1]
             cuisine = lines[i + 2]
@@ -310,9 +311,10 @@ def process_output(text, days_of_week, meals_for_the_day):
             recipe.append(lines[i])
 
         elif current_meal and inside_nutrition:
-            nutritionalInformation.append(lines[i])
+            if any(s in lines[i] for s in nutrients):
+                nutritionalInformation.append(lines[i].replace('-', '').strip())
 
-        if (meals > 0 and i + 1 < len(lines) and any(meal in lines[i + 1] for meal in meals_for_the_day)) or (i == len(lines)):
+        if (meals > 0 and i + 1 < len(lines) and any(meal in lines[i + 1] for meal in meals_for_the_day)) or (i + 1 == len(lines)):
             meal_dict = {}
             meal_dict['type'] = meal_type,
             meal_dict['dishName'] = dish,
@@ -323,8 +325,7 @@ def process_output(text, days_of_week, meals_for_the_day):
 
             current_meal['meals'].append(meal_dict)
 
-    if current_meal:
-        formatted_output.append(current_meal)
+    formatted_output.append(current_meal)
 
     return formatted_output
 

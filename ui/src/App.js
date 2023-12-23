@@ -92,18 +92,30 @@ function App() {
               <strong>{meal['type']} - {meal['dishName']}</strong><br />
               <p>Ingredients:</p>
               <ul>
-                {meal['ingredients'].map((ingredient, ingredientIndex) => (
+                {meal['ingredients'][0].map((ingredient, ingredientIndex) => (
                   <li key={ingredientIndex}>{ingredient}</li>
                 ))}
               </ul>
               <p>Recipe:</p>
               <ul>
-                {meal['recipe'].map((step, stepIndex) => (
-                  <li key={stepIndex}>{step}</li>
+                {meal['recipe'][0].map((step, stepIndex) => (
+                  <p key={stepIndex}>{step}</p>
                 ))}
               </ul>
               <p>Nutritional Information:</p>
-              <p>Calories - {meal['nutritionalInformation'].Calories}, Protein - {meal['nutritionalInformation'].Protein}, Carbs - {meal['nutritionalInformation'].Carbohydrates}, Fat - {meal['nutritionalInformation'].Fat}</p>
+              <ul>
+              {/* Check if nutritionalInformation is an array or an object */}
+              {Array.isArray(meal['nutritionalInformation']) ? (
+                meal['nutritionalInformation'].map((info, infoIndex) => (
+                  <li key={infoIndex}>{info}</li>
+                ))
+              ) : (
+                Object.entries(meal['nutritionalInformation']).map(([key, value], infoIndex) => (
+                  <li key={infoIndex}>{key} - {value}</li>
+                ))
+              )}
+            </ul>
+              {/* <p>Calories - {meal['nutritionalInformation'].Calories}, Protein - {meal['nutritionalInformation'].Protein}, Carbs - {meal['nutritionalInformation'].Carbohydrates}, Fat - {meal['nutritionalInformation'].Fat}</p> */}
             </div>
           ))}
         </div>
