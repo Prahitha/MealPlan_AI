@@ -44,12 +44,13 @@ def generate_text():
         data = request.get_json()
 
         pantry_items = data.get('pantry_items', [])
-        dietary_preferences = data.get('dietary_preferences', '')
+        dietary_preferences = data.get('dietary_preferences', [])
         allergies = data.get('allergies', [])
         family_size = data.get('family_size', '')
         cooking_time = data.get('cooking_time', '')
         days_of_week = data.get('days_of_week', [])
-        meals_for_the_day = data.get('meals_for_the_day', '')
+        meals_for_the_day = data.get('meals_for_the_day', [])
+        cuisine = data.get('cuisine', [])
 
         # generated_output = [
         #                     {
@@ -221,7 +222,7 @@ def generate_text():
         #                     }
         #                     ]
 
-        generated_output = get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergies, family_size, cooking_time, days_of_week, meals_for_the_day)
+        generated_output = get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergies, family_size, cooking_time, days_of_week, meals_for_the_day, cuisine)
 
         return jsonify({'status': 'success', 'formatted_output': generated_output})
 
@@ -238,8 +239,6 @@ def remove_words(text, words_to_remove):
 def process_output(text, days_of_week, meals_for_the_day):
     words_to_remove = ["Meal Type", "Name of the Dish", "Cuisine"]
     text = remove_words(text, words_to_remove)
-
-    print(days_of_week, meals_for_the_day)
 
     # Split the text into lines, trim each line, and remove empty lines
     lines = [line.strip() for line in text.split('\n') if line.strip()]
@@ -258,7 +257,7 @@ def process_output(text, days_of_week, meals_for_the_day):
     # Iterate through the lines
     for i in range(len(lines)):
         # Check if the line matches any day
-        if any(lines[i] in day for day in days_of_week):
+        if any(day in lines[i] for day in days_of_week):
             if current_meal:
                 meal_dict = {}
                 meal_dict['type'] = meal_type,
@@ -292,7 +291,8 @@ def process_output(text, days_of_week, meals_for_the_day):
             inside_nutrition = True
 
         # Check if the line matches any meal
-        elif any(lines[i] in meal for meal in meals_for_the_day):
+        elif any(meal in lines[i] for meal in meals_for_the_day):
+            print("here")
             meal_type = next(meal for meal in meals_for_the_day if meal in lines[i])
             dish = lines[i + 1]
             cuisine = lines[i + 2]
@@ -330,7 +330,8 @@ def process_output(text, days_of_week, meals_for_the_day):
     return formatted_output
 
 
-def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergies, family_size, cooking_time, days_of_week, meals_for_the_day):
+def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergies, family_size, cooking_time, days_of_week, meals_for_the_day, cuisine):
+    print(pantry_items, dietary_preferences, allergies, family_size, cooking_time, days_of_week, meals_for_the_day, cuisine)
     # Construct a prompt for OpenAI GPT-3
     # prompt = f"Generate meal suggestions for {meals_for_the_day} with ingredients: {', '.join(pantry_items)}. Dietary preferences: {dietary_preferences}. Allergies: {', '.join(allergies)}. Family size: {family_size}. Cooking time: {cooking_time}. Days of Week: {', '.join(days_of_week)}."
 
@@ -338,6 +339,7 @@ def get_meal_suggestions_from_openai(pantry_items, dietary_preferences, allergie
                 Pantry items: {', '.join(pantry_items)}
                 Dietary preferences: {dietary_preferences}
                 Allergies: {', '.join(allergies)}
+                Cuisine: {', '.join(cuisine)}
                 Family size: {family_size}
                 Cooking time: {cooking_time}
                 Days of Week: {', '.join(days_of_week)}

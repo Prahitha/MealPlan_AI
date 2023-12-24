@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { useDropzone } from 'react-dropzone';
+import { FcUpload } from 'react-icons/fc';
 
 const ImageUploader = ({ onFoodItemsReceived }) => {
   const onDrop = async (acceptedFiles) => {
@@ -23,7 +24,6 @@ const ImageUploader = ({ onFoodItemsReceived }) => {
       });
 
       // Assuming the server responds with the recognized text
-      console.log(response.data)
       onFoodItemsReceived(response.data);
 
     } catch (error) {
@@ -39,33 +39,12 @@ const ImageUploader = ({ onFoodItemsReceived }) => {
 
   return (
     <div>
-      <div {...getRootProps()} style={dropzoneStyle}>
+      <div {...getRootProps()}>
         <input {...getInputProps()} />
-        <p>Drag & drop an image here, or click to select one</p>
+        <FcUpload size={35}/>
       </div>
     </div>
   );
-};
-
-const dropzoneStyle = {
-  border: '2px dashed #ccc',
-  borderRadius: '4px',
-  padding: '20px',
-  textAlign: 'center',
-  cursor: 'pointer',
-};
-
-const imageStyle = {
-  marginTop: '20px',
-  maxWidth: '100%',
-};
-
-// Placeholder function to extract food items from recognized text
-const extractFoodItemsFromRecognizedText = (recognizedText) => {
-  // Implement your logic to extract food items from recognized text
-  // This will depend on the structure of the recognized text
-  // Return an array of food items
-  return [];
 };
 
 export default ImageUploader;
