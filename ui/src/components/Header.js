@@ -22,14 +22,14 @@ const Header = ({ user, onLogout }) => {
             <Box marginRight={4}>
               <Avatar size="sm" name={user.displayName} />
             </Box>
-            <Text color="white" marginRight={4}>{user.displayName}</Text>
+            <Text color="#2D303C" marginRight={4}>{user.displayName}</Text>
             <Button onClick={onLogout} colorScheme="red" size="sm">
               Logout
             </Button>
           </Flex>
         ) : (
           // <Link to="/login">
-            <Button colorScheme="#2D303C" size="sm">
+            <Button bg="#2D303C" color="white" _hover={{color: "#38A169"}} size="sm">
               Login
             </Button>
           // </Link>
