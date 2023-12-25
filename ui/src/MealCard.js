@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
     Card,
     CardHeader,
@@ -17,10 +18,12 @@ import {
     AccordionPanel,
     AccordionIcon,
     GridItem,
+    Button,
+    IconButton,
   } from "@chakra-ui/react";
-  import { MinusIcon, AddIcon } from "@chakra-ui/icons"
+import { MinusIcon, AddIcon, StarIcon } from "@chakra-ui/icons";
   
-  export const MealCard = ({
+const MealCard = ({
     mealType,
     cusine,
     dishName,
@@ -28,6 +31,27 @@ import {
     recipe,
     nutritionalInformation,
   }) => {
+
+    const handleSave = async (meal) => {
+        try {
+            const response = await axios.post('/{user_id}/profile', meal, {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if(response.ok) {
+                // change the color of the star icon to yellow from grey
+                // add a const and change its state to reflect the saved status
+                console.log("Meal Saved!");
+            } else {
+                console.log(response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('Error saving meal: ', error.message);
+        }
+    }
+
     return (
       <Card flex={1} bg={"#DAF3A4"} height={"230px"} width={"550px"} overflowY="scroll">
         <CardHeader paddingTop={"15px"} paddingBottom={"0px"}>
@@ -146,3 +170,5 @@ import {
     );
   };
   
+
+export default MealCard;
