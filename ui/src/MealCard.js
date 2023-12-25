@@ -1,3 +1,4 @@
+import { useState } from "react";
 import axios from "axios";
 import {
     Card,
@@ -24,28 +25,33 @@ import {
 import { MinusIcon, AddIcon, StarIcon } from "@chakra-ui/icons";
   
 const MealCard = ({
-    mealType,
-    cusine,
-    dishName,
-    ingredients,
-    recipe,
-    nutritionalInformation,
-  }) => {
+        mealType,
+        cusine,
+        dishName,
+        ingredients,
+        recipe,
+        nutritionalInformation,
+    }) => {
+    
+    const [iconColor, setIconColor] = useState("#718096");
+    const [isSaved, setIsSaved] = useState(false);
 
     const handleSave = async (meal) => {
         try {
-            const response = await axios.post('/{user_id}/profile', meal, {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            });
+            // const response = await axios.post('/{user_id}/profile', meal, {
+            //   headers: {
+            //     'Content-Type': 'application/json',
+            //   },
+            // });
 
-            if(response.ok) {
+            if(true) {
                 // change the color of the star icon to yellow from grey
                 // add a const and change its state to reflect the saved status
                 console.log("Meal Saved!");
+                setIsSaved(!isSaved);
+                setIconColor(isSaved ? "#D69E2E" : "#718096");
             } else {
-                console.log(response.status, response.statusText);
+                console.log(false);
             }
         } catch (error) {
             console.error('Error saving meal: ', error.message);
@@ -53,11 +59,15 @@ const MealCard = ({
     }
 
     return (
-      <Card flex={1} bg={"#DAF3A4"} height={"230px"} width={"550px"} overflowY="scroll">
+      <Card flex={1} bg={"#DAF3A4"} height={"250px"} width={"550px"} overflowY="scroll">
         <CardHeader paddingTop={"15px"} paddingBottom={"0px"}>
           <Flex justifyContent={"space-between"}>
             <Text fontSize="medium" fontWeight={"350"}>{mealType} </Text>
-            <Tag borderRadius="full" variant="solid" colorScheme="purple">{cusine}</Tag>
+            <Box>
+                <Tag borderRadius="full" variant="solid" colorScheme="purple">{cusine}</Tag>
+                <IconButton icon={<StarIcon />} boxSize={6} color={isSaved ? "#D69E2E" : "#718096"} _hover={{ color: "#D69E2E" }} 
+                    aria-label={isSaved ? "Unsave" : "Save"} bg="#DAF3A4" onClick={handleSave}/>
+            </Box>
           </Flex>
         </CardHeader>
         <CardBody paddingTop={"10px"} paddingBottom={"10px"}>
@@ -134,7 +144,7 @@ const MealCard = ({
                             </ol>
                         </Box>
                         </AccordionPanel>
-                    ) : (
+                        ) : (
                         <AccordionPanel pb={4}>
                         <Box paddingX={4}>
                             <ol>
@@ -152,18 +162,12 @@ const MealCard = ({
           </Box>
         </CardBody>
         <CardFooter paddingTop={"0px"}>
-          <HStack spacing={4}>
+          <HStack wrap="wrap" gap={1} spacing={4}>
             {nutritionalInformation.map(nutrients => (
               <Tag borderRadius="full" variant="solid" colorScheme="green">
                 <TagLabel>{nutrients}</TagLabel>
               </Tag>
             ))}
-            {/* <Tag borderRadius="full" variant="solid" colorScheme="green">
-              <TagLabel>Protien : {protein}g</TagLabel>
-            </Tag>
-            <Tag borderRadius="full" variant="solid" colorScheme="green">
-              <TagLabel>Calories : {calories}</TagLabel>
-            </Tag> */}
           </HStack>
         </CardFooter>
       </Card>

@@ -3,6 +3,7 @@ import {
     CardHeader,
     CardBody,
     CardFooter,
+    Center,
     Flex,
     Tag,
     TagLabel,
@@ -18,10 +19,11 @@ import {
     AccordionIcon,
     GridItem,
   } from "@chakra-ui/react";
-  import { MealCard } from "./MealCard";
+  import MealCard from "./MealCard";
   
   export const Meals = ({ mealSuggestions }) => {
     return (
+     <Center>
       <Stack padding={4}>
         {mealSuggestions.formatted_output && Array.isArray(mealSuggestions.formatted_output) && mealSuggestions.formatted_output?.map(({ day, meals }) => {
           return (
@@ -63,6 +65,7 @@ import {
           );
         })}
       </Stack>
+      </Center>
     );
   };
   
