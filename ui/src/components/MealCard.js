@@ -38,20 +38,18 @@ const MealCard = ({
 
     const handleSave = async (meal) => {
         try {
-            // const response = await axios.post('/{user_id}/profile', meal, {
-            //   headers: {
-            //     'Content-Type': 'application/json',
-            //   },
-            // });
+            const response = await axios.post('/{user_id}/profile', meal, {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
 
-            if(true) {
-                // change the color of the star icon to yellow from grey
-                // add a const and change its state to reflect the saved status
+            if(response.ok) {
                 console.log("Meal Saved!");
                 setIsSaved(!isSaved);
                 setIconColor(isSaved ? "#D69E2E" : "#718096");
             } else {
-                console.log(false);
+                console.log(response.status, response.statusText);
             }
         } catch (error) {
             console.error('Error saving meal: ', error.message);
