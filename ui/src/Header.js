@@ -1,24 +1,20 @@
-import React from 'react';
-import {
-    Box,
-    Flex,
-    Heading,
-    Avatar,
-  } from '@chakra-ui/react';
+import React from "react";
+import { Box, Flex, Heading, Avatar } from "@chakra-ui/react";
+import RobotChef from './robot-chef.webp'
 
-const Header =  () => {
-    return (
-        <Box>
-        <Flex justify="space-between" align="center" p={4}>
-          {/* Logo */}
-          <Box flex="1/6">Your Logo</Box>
-          <Heading as='h2' size='xl'>MealPlan AI</Heading>
-          <Box flex="1/6" textAlign="right">
-            <Avatar bg='green' size='2xs' />
-          </Box>
-        </Flex>
+const Header = () => {
+  return (
+    <Flex justify="space-between" align="center" p={4}>
+      {/* Logo */}
+        <Box height={"80px"}>
+        <img height={'80px'} src={RobotChef} alt="RoboChef Logo" />
         </Box>
-      )
-  };
-  
+      <Heading as="h2" color='#2D303C' size="xl">
+        MealPlan AI
+      </Heading>
+        <Avatar bg="#2D303C" size="sm" />
+    </Flex>
+  );
+};
+
 export default Header;

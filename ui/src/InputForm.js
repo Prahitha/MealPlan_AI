@@ -3,14 +3,20 @@ import {
   Box,
   Flex,
   FormControl,
+  FormErrorMessage,
+  FormHelperText,
   FormLabel,
+  Grid,
+  GridItem,
   Input,
   Button,
   CheckboxGroup,
   Checkbox,
   Select,
+  Stack,
+  InputGroup,
+  InputRightElement,
 } from '@chakra-ui/react';
-// import Select from 'react-select';
 import axios from 'axios';
 import ImageUploader from "./ImageUploader";
 
@@ -24,12 +30,16 @@ const InputForm = ({onSubmit}) => {
     const [daysOfWeek, setDaysOfWeek] = useState([]);
     const [mealsForTheDay, setMealsForTheDay] = useState([]);
     const [cuisine, setCuisine] = useState('');
-    const [mealSuggestions, setMealSuggestions] = useState([]);
+    // const [mealSuggestions, setMealSuggestions] = useState([]);
     const [foodItems, setFoodItems] = useState([]);
+
+    // Better FormControl: user can just type gibberish and it would still work right now
+    const trimmedPantry = pantryItems.trim();
+    const trimmedCuisine = cuisine.trim();
   
-    useEffect(() => {
-      console.log('mealSuggestions updated:', mealSuggestions);
-    }, [mealSuggestions]);
+    // useEffect(() => {
+    //   console.log('mealSuggestions updated:', mealSuggestions);
+    // }, [mealSuggestions]);
   
     const onFoodItemsReceived = (items) => {
       const updatedPantryItems = [...pantryItems.split(','), ...items].join(', ');
@@ -38,7 +48,7 @@ const InputForm = ({onSubmit}) => {
     };
   
     const generateMealSuggestions = async (e) => {
-      e.preventDefault();
+      // e.preventDefault();
       try {
         const response = await axios.post('http://127.0.0.1:5000/generate_text', {
           pantry_items: pantryItems.split(',').map(item => item.trim()),
@@ -52,102 +62,207 @@ const InputForm = ({onSubmit}) => {
         });
   
         console.log('API Response:', response.data);
-        setMealSuggestions(response.data);
+        onSubmit(response.data);
       } catch (error) {
         console.error('Error generating meal suggestions:', error);
       }
     };
 
     const handleSubmit = (e) => {
-      e.preventDefault();
+      // e.preventDefault();
       // Pass formData to the onSubmit function
-      onSubmit(mealSuggestions);
+      generateMealSuggestions();
     };
 
     return (
-      <Box>
+      <>
         {/* Form */}
-        <FormControl p={4} onSubmit={handleSubmit}>
-          {/* Ingredients List */}
-          <Flex align="center">
-          {/* This should be a creatable multi select from react-select*/}
-            <Input type="text" placeholder="Ingredients List" flex="5/6" value={pantryItems} onChange={(e) => setPantryItems(e.target.value)} />
-            <ImageUploader onFoodItemsReceived={onFoodItemsReceived} />
-          </Flex>
-
-          {/* Dietary Preferences */}
-          <FormLabel mt={4}>Dietary Preferences</FormLabel>
-          <CheckboxGroup colorScheme="green" value={dietaryPreferences} onChange={(values) => setDietaryPreferences(values)} >
-            <Checkbox value="Vegan">Vegan</Checkbox>
-            <Checkbox value="Vegetarian">Vegetarian</Checkbox>
-            <Checkbox value="Keto">Keto</Checkbox>
-            <Checkbox value="Kosher">Kosher</Checkbox>
-            <Checkbox value="Diabetes">Diabetes</Checkbox>
-            <Checkbox value="Low-carb">Low-carb</Checkbox>
-            <Checkbox value="Pescatarian">Pescatarian</Checkbox>
-            <Checkbox value="Gluten-free">Gluten-free</Checkbox>
-            <Checkbox value="Dairy-free">Dairy-free</Checkbox>
-          </CheckboxGroup>
-
-          {/* Allergies */}
-          <FormLabel mt={4}>Allergies</FormLabel>
-          {/* This should be a creatable multi select from react-select*/}
-            <Input type="text" placeholder="Allergies" value={allergies} onChange={(e) => setAllergies(e.target.value)} />
-
-          {/* Family Size */}
-          <FormLabel mt={4}>Family Size</FormLabel>
-          <Select placeholder='Select option' value={familySize} onChange={(e) => setFamilySize(e.target.value)} >
-          <option value='1'>1</option>
-          <option value='2'>2</option>
-          <option value='4'>4</option>
-          <option value='6'>6</option>
-          <option value='6+'>6+</option>
-          </Select>
-
-          {/* Meals of the Day */}
-          <FormLabel mt={4}>Meals of the Day</FormLabel>
-          <CheckboxGroup colorScheme="blue" value={mealsForTheDay} onChange={(values) => setMealsForTheDay(values)} >
-            <Checkbox value="Breakfast">Breakfast</Checkbox>
-            <Checkbox value="Lunch">Lunch</Checkbox>
-            <Checkbox value="Dinner">Dinner</Checkbox>
-            <Checkbox value="Snack">Snack</Checkbox>
-            <Checkbox value="Dessert">Dessert</Checkbox>
-          </CheckboxGroup>
-
-          {/* Cuisine */}
-          <FormLabel mt={4}>Cuisine</FormLabel>
-          {/* This should be a creatable multi select from react-select*/}
-            <Input type="text" placeholder="Cuisines" value={cuisine} onChange={(e) => setCuisine(e.target.value)} />
-
-          {/* Cooking Time */}
-          <FormLabel mt={4}>Cooking Time</FormLabel>
-          <Select placeholder='Select option' value={cookingTime} onChange={(e) => setCookingTime(e.target.value)} >
-          <option value='10 minutes'>10 minutes</option>
-          <option value='20 minutes'>20 minutes</option>
-          <option value='30 minutes'>30 minutes</option>
-          <option value='60 minutes'>60 minutes</option>
-          <option value='Over an hour'>Over an hour</option>
-          </Select>
-
-          {/* Days of Week */}
-          <FormLabel mt={4}>Days of Week</FormLabel>
-          <CheckboxGroup colorScheme="purple" value={daysOfWeek} onChange={(values) => setDaysOfWeek(values)} >
-            <Checkbox value="Monday">Monday</Checkbox>
-            <Checkbox value="Tuesday">Tuesday</Checkbox>
-            <Checkbox value="Wednesday">Wednesday</Checkbox>
-            <Checkbox value="Thursday">Thursday</Checkbox>
-            <Checkbox value="Friday">Friday</Checkbox>
-            <Checkbox value="Saturday">Saturday</Checkbox>
-            <Checkbox value="Sunday">Sunday</Checkbox>
-          </CheckboxGroup>
-
-          {/* Generate Button */}
-          <Button type="submit" mt={4} colorScheme="teal" onClick={generateMealSuggestions} >
-            Generate
-          </Button>
+        <FormControl>
+          <Grid
+            templateRows="repeat(4, 1fr)"
+            templateColumns="repeat(3, 1fr)"
+            gap={2}
+            padding={3}
+            h="250px"
+          >
+            {/* Ingredients List */}
+            <GridItem colSpan={3} rowSpan={1} bg="white">
+              <FormControl isInvalid={trimmedPantry.length === 0}>
+              <Flex align="center">
+                {/* This should be a creatable multi select from react-select*/}
+                <Input
+                  type="text"
+                  borderColor="transparent"
+                  placeholder="Ingredients List"
+                  flex="5/6"
+                  value={pantryItems}
+                  onChange={e => setPantryItems(e.target.value)}
+                />
+                {trimmedPantry.length === 0 ? (
+                  <FormErrorMessage paddingLeft={"5px"} marginTop={"-3px"}>At least one ingredient is required.</FormErrorMessage>
+                ) : (
+                  <>
+                  </>
+                )}
+                <ImageUploader onFoodItemsReceived={onFoodItemsReceived} />
+              </Flex>
+              </FormControl>
+            </GridItem>
+  
+            {/* Dietary Preferences */}
+            <GridItem rowSpan={2} colSpan={1} bg="white" padding={2}>
+              <FormLabel>Dietary Preferences</FormLabel>
+              <Flex direction="row" flexWrap="wrap" gap={3}>
+              <CheckboxGroup
+                colorScheme="purple"
+                value={dietaryPreferences}
+                onChange={values => setDietaryPreferences(values)}>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Vegan">Vegan</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Vegetarian">Vegetarian</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Keto">Keto</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Kosher">Kosher</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Diabetes">Diabetes</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Low-carb">Low-carb</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Pescatarian">Pescatarian</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Gluten-free">Gluten-free</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Dairy-free">Dairy-free</Checkbox>
+              </CheckboxGroup>
+              </Flex>
+            </GridItem>
+  
+            {/* Family Size */}
+            <GridItem rowSpan={1} colSpan={1} bg="white" padding={2}>
+              <FormLabel hidden>Family Size</FormLabel>
+              <Select
+                placeholder="Family Size"
+                value={familySize}
+                onChange={e => setFamilySize(e.target.value)}>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+                <option value="6+">6+</option>
+              </Select>
+            </GridItem>
+  
+            {/* Cooking Time */}
+            <GridItem rowSpan={1} colSpan={1} bg="white" padding={2}>
+              <FormLabel hidden>Cooking Time</FormLabel>
+              <Select
+                placeholder="Cooking Time"
+                value={cookingTime}
+                onChange={e => setCookingTime(e.target.value)}>
+                <option value="10 minutes">10 minutes</option>
+                <option value="20 minutes">20 minutes</option>
+                <option value="30 minutes">30 minutes</option>
+                <option value="60 minutes">60 minutes</option>
+                <option value="Over an hour">Over an hour</option>
+              </Select>
+            </GridItem>
+  
+            {/* Meals of the Day */}
+            <GridItem rowSpan={1} colSpan={1} bg="white" padding={2}>
+            <FormControl isInvalid={mealsForTheDay.length === 0}>
+              <FormLabel>Meals of the Day</FormLabel>
+              <Flex direction="row" flexWrap="wrap" gap={7}>
+              <CheckboxGroup
+                colorScheme="purple"
+                value={mealsForTheDay}
+                onChange={values => setMealsForTheDay(values)}>
+                <Checkbox marginRight="8px" borderColor="#718096" value="Breakfast">Breakfast</Checkbox>
+                <Checkbox marginRight="8px" borderColor="#718096" value="Lunch">Lunch</Checkbox>
+                <Checkbox marginRight="8px" borderColor="#718096" value="Dinner">Dinner</Checkbox>
+                <Checkbox marginRight="8px" borderColor="#718096" value="Snack">Snack</Checkbox>
+                <Checkbox marginRight="8px" borderColor="#718096" value="Dessert">Dessert</Checkbox>
+              </CheckboxGroup>
+              {mealsForTheDay.length === 0 ? (
+                  <>
+                  </>
+                ) : (
+                  <FormErrorMessage paddingLeft={"5px"} marginTop={"-3px"}>At least one meal is required.</FormErrorMessage>
+                )}
+              </Flex>
+              </FormControl>
+            </GridItem>
+  
+            {/* Days of Week */}
+            <GridItem rowSpan={1} colSpan={1} bg="white" padding={2}>
+            <FormControl isInvalid={daysOfWeek.length === 0}>
+              <FormLabel>Days of Week</FormLabel>
+              <Flex direction="row" flexWrap="wrap" gap={3}>
+              <CheckboxGroup
+                colorScheme="purple"
+                value={daysOfWeek}
+                onChange={values => setDaysOfWeek(values)}>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Monday">Monday</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Tuesday">Tuesday</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Wednesday">Wednesday</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Thursday">Thursday</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Friday">Friday</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Saturday">Saturday</Checkbox>
+                <Checkbox marginRight="16px" borderColor="#718096" value="Sunday">Sunday</Checkbox>
+              </CheckboxGroup>
+              {daysOfWeek.length === 0 ? (
+                  <>
+                  </>
+                ) : (
+                  <FormErrorMessage paddingLeft={"5px"} marginTop={"-3px"}>At least one day is required.</FormErrorMessage>
+                )}
+              </Flex>
+              </FormControl>
+            </GridItem>
+  
+            {/* Allergies */}
+            <GridItem rowSpan={1} colSpan={1} bg="white" padding={2}>
+              <FormLabel hidden>Allergies</FormLabel>
+              {/* This should be a creatable multi select from react-select*/}
+              <Input
+                type="text"
+                placeholder="Allergies"
+                value={allergies}
+                onChange={e => setAllergies(e.target.value)}
+              />
+            </GridItem>
+  
+            <GridItem rowSpan={1} colSpan={1} bg="white" padding={2}>
+              {/* Cuisine */}
+              <FormControl isInvalid={trimmedCuisine.length === 0}>
+              <FormLabel hidden>Cuisine</FormLabel>
+              {/* This should be a creatable multi select from react-select*/}
+              <Input
+                type="text"
+                placeholder="Cuisines"
+                value={cuisine}
+                onChange={e => setCuisine(e.target.value)}
+              />
+              {/* {console.log(trimmedCuisine.length)} */}
+              {trimmedCuisine.length === 0 ? (
+                  <FormErrorMessage marginTop={"-1px"}>At least one cuisine is required.</FormErrorMessage>
+              ) : (
+                  <>
+                  </>
+              )}
+              </FormControl>
+            </GridItem>
+  
+            {/* Generate Button */}
+            <GridItem rowSpan={1} colSpan={1}>
+              <Button
+                type="submit"
+                bgColor="#899968"
+                size="lg"
+                height="100%"
+                width="100%"
+                borderRadius={0}
+                onClick={handleSubmit}
+              >
+                GENERATE MEAL SUGGESTIONS
+              </Button>
+            </GridItem>
+          </Grid>
         </FormControl>
-      </Box>
-    )
-}
+      </>
+    );
+};
 
 export default InputForm;
