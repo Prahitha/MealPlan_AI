@@ -1,5 +1,6 @@
 # .gitignore
 .DS_Store
+node_modules
 
 backend/__pycache__/
 
@@ -10,3 +11,4 @@ venv/
 keys.txt
 backend/config.py
 backend/vision_api_key.json
+src/components/firebase.js
