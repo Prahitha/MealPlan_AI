@@ -1,21 +1,21 @@
 import React from "react";
 import { Box, Flex, Heading, Avatar, Text, Button } from "@chakra-ui/react";
 import { Link } from 'react-router-dom';
-import { ReactComponent as RobotIcon } from './robo-icon.svg';
+import { ReactComponent as RobotIcon } from './robot-chef.svg';
 
 const Header = ({ user, onLogout }) => {
   return (
     <Flex align="center" justify="space-between" paddingX={6}>
       {/* Logo */}
       <Box height={"80px"}>
-        {/* <Link to="/"> */}
+        <Link href="/">
             <RobotIcon />
-        {/* </Link> */}
+        </Link>
       </Box>
       <Heading as="h2" color="#2D303C" size="xl">
         MealPlan AI
       </Heading>
-      <Avatar bg="#2D303C" size="sm" />
+      {/* <Avatar bg="#2D303C" size="sm" /> */}
       <Flex align="center">
         {user ? (
           <Flex align="center">
@@ -28,11 +28,11 @@ const Header = ({ user, onLogout }) => {
             </Button>
           </Flex>
         ) : (
-          // <Link to="/login">
+          <Link href="/login">
             <Button bg="#2D303C" color="white" _hover={{color: "#38A169"}} size="sm">
               Login
             </Button>
-          // </Link>
+          </Link>
         )}
       </Flex>
     </Flex>

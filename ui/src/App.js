@@ -7,14 +7,16 @@ import Profile from './components/Profile';
 
 function App() {
   return (
+    <div>
     <Router>
       <Routes>
-        <Route path="/login" component={Login} />
-        <Route path="/signup" component={SignUp} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/" component={Home} />
+        <Route exact path="/login" element={<Login />} />
+        <Route exact path="/signup" element={<SignUp />} />
+        <Route exact path="/profile" element={<Profile />} />
+        <Route exact path="/" element={<Home />} />
       </Routes>
     </Router>
+    </div>
   );
 }
 
