@@ -29,7 +29,7 @@ export const Meals = ({ mealSuggestions, userId }) => {
                 {/* Grid layout for displaying meal cards */}
                 <Grid
                   // Adjusting the number of columns based on the number of meals
-                  templateColumns={`repeat(${meals.length > 2 ? 3 : 2}, 1fr)`}
+                  templateColumns={`repeat(${meals.length > 2 ? 3 : meals.length}, 1fr)`}
                   gap={2}
                 >
                   {/* Mapping through individual meals to display MealCard components */}
@@ -52,9 +52,9 @@ export const Meals = ({ mealSuggestions, userId }) => {
                           mealType={type}
                           cuisine={cuisine}
                           dishName={dishName}
-                          recipe={recipe}
+                          recipe={recipe[0]}
                           nutritionalInformation={nutritionalInformation}
-                          ingredients={ingredients}
+                          ingredients={ingredients[0]}
                           user={userId}
                         />
                       </GridItem>

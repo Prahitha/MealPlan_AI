@@ -26,6 +26,8 @@ import {
 } from "@chakra-ui/react";
 import { MinusIcon, AddIcon, StarIcon } from "@chakra-ui/icons";
 import { useAuth } from "./AuthContext.js";
+import { firestore } from './firebase';
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * MealCard component renders a card displaying information about a meal, including
@@ -55,20 +57,21 @@ const MealCard = ({
     const [showLoginError, setShowLoginError] = useState(false);
     const authContext = useAuth;
     const userId = user.user;
+    const mealId = uuidv4();
 
-    const mealJSON = {
-      mealType: mealType,
-      cuisine: cuisine,
-      dishName: dishName,
-      ingredients: ingredients,
-      recipe: recipe,
-      nutritionalInformation: nutritionalInformation,
-    }
+    const collectionRef = firestore.collection('users').doc(userId).collection('profile');
+
+    const mealData = {
+      mealType,
+      cuisine,
+      dishName,
+      ingredients,
+      recipe,
+      nutritionalInformation,
+  };
 
     /**
      * Handles saving or unsaving a meal based on the current state.
-     *
-     * @param {Object} mealJSON - The meal to be saved or unsaved.
      */
     const handleSave = async () => {
         if (!isUserLoggedIn) {
@@ -77,20 +80,19 @@ const MealCard = ({
         }
       
         try {
-            console.log(mealJSON);
+            console.log(mealType, cuisine, dishName, ingredients, recipe, nutritionalInformation);
             console.log(userId);
-            const response = await axios.post(`/users/${userId}/profile`, mealJSON, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            console.log(firestore);
 
-            if (response.ok) {
-                console.log("Meal Saved!");
-                setIsSaved((isSaved) => !isSaved);
-            } else {
-                console.log(response.status, response.statusText);
-            }
+            await collectionRef.doc(mealId).set(mealData);
+
+
+            // if (response.ok) {
+            //     console.log("Meal Saved!");
+            //     setIsSaved((isSaved) => !isSaved);
+            // } else {
+            //     console.log(response.status, response.statusText);
+            // }
         } catch (error) {
             console.error('Error saving meal: ', error.message);
         }
@@ -163,7 +165,7 @@ const MealCard = ({
                                         <AccordionPanel bg={"#38A169"} borderBottomLeftRadius={"5px"} borderBottomRightRadius={"5px"} pb={4}>
                                             <Box paddingX={4}>
                                                 <ul>
-                                                    {ingredients[0].map(ingredient => (
+                                                    {ingredients.map(ingredient => (
                                                         <li>{ingredient}</li>
                                                     ))}
                                                 </ul>
@@ -173,7 +175,7 @@ const MealCard = ({
                                         <AccordionPanel pb={4}>
                                             <Box paddingX={4}>
                                                 <ul>
-                                                    {ingredients[0].map(ingredient => (
+                                                    {ingredients.map(ingredient => (
                                                         <li>{ingredient}</li>
                                                     ))}
                                                 </ul>
@@ -206,7 +208,7 @@ const MealCard = ({
                                         <AccordionPanel bg={"#38A169"} borderBottomLeftRadius={"5px"} borderBottomRightRadius={"5px"} pb={4}>
                                             <Box paddingX={4}>
                                                 <ol>
-                                                    {recipe[0].map(step => (
+                                                    {recipe.map(step => (
                                                         <p>{step}</p>
                                                     ))}
                                                 </ol>
@@ -216,7 +218,7 @@ const MealCard = ({
                                         <AccordionPanel pb={4}>
                                             <Box paddingX={4}>
                                                 <ol>
-                                                    {recipe[0].map(step => (
+                                                    {recipe.map(step => (
                                                         <p>{step}</p>
                                                     ))}
                                                 </ol>

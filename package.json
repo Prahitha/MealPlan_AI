@@ -2,6 +2,7 @@
   "dependencies": {
     "@atlaskit/tooltip": "^18.1.0",
     "firebase": "^10.7.1",
-    "react-router-dom": "^6.21.1"
+    "react-router-dom": "^6.21.1",
+    "uuid": "^9.0.1"
   }
 }
