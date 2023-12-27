@@ -26,8 +26,9 @@ import {
 } from "@chakra-ui/react";
 import { MinusIcon, AddIcon, StarIcon } from "@chakra-ui/icons";
 import { useAuth } from "./AuthContext.js";
-import { firestore } from './firebase';
+import { auth, firestore } from './firebase';
 import { v4 as uuidv4 } from "uuid";
+import { doc, addDoc, setDoc, deleteDoc, collection } from "firebase/firestore";
 
 /**
  * MealCard component renders a card displaying information about a meal, including
@@ -55,11 +56,13 @@ const MealCard = ({
     const [isSaved, setIsSaved] = useState(false);
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
     const [showLoginError, setShowLoginError] = useState(false);
+    const [mealId, setMealId] = useState();
     const authContext = useAuth;
-    const userId = user.user;
-    const mealId = uuidv4();
+    const userId = user.user || user.uid;
+    const userVerified = auth.currentUser;
 
-    const collectionRef = firestore.collection('users').doc(userId).collection('profile');
+    const collectionRef = collection(firestore, 'users', userId, 'profile');
+    // const user = firebase.auth().currentUser;
 
     const mealData = {
       mealType,
@@ -70,6 +73,15 @@ const MealCard = ({
       nutritionalInformation,
   };
 
+    useEffect(() => {
+      // Check if the user is logged in
+      setIsUserLoggedIn(!!user);
+      if (user && !isSaved){
+        setMealId(null);
+      }
+      console.log(mealId);
+    }, [user, isSaved]);
+
     /**
      * Handles saving or unsaving a meal based on the current state.
      */
@@ -78,30 +90,29 @@ const MealCard = ({
           setShowLoginError(true);
           return;
         }
-      
-        try {
-            console.log(mealType, cuisine, dishName, ingredients, recipe, nutritionalInformation);
-            console.log(userId);
-            console.log(firestore);
 
-            await collectionRef.doc(mealId).set(mealData);
+        let mealDocRef;
 
-
-            // if (response.ok) {
-            //     console.log("Meal Saved!");
-            //     setIsSaved((isSaved) => !isSaved);
-            // } else {
-            //     console.log(response.status, response.statusText);
-            // }
-        } catch (error) {
-            console.error('Error saving meal: ', error.message);
+        if (userVerified) {
+          if (isSaved) {
+            mealDocRef = doc(collectionRef, mealId);
+            await deleteDoc(mealDocRef);
+            console.log('Meal unsaved!');
+            setIsSaved(false);
+            setMealId(null);
+          }
+          else {
+            try {
+                mealDocRef = await addDoc(collectionRef, mealData);
+                console.log("Meal Saved!");
+                setIsSaved(true);
+                setMealId(mealDocRef.id);
+            } catch (error) {
+                console.error('Error saving meal: ', error.message);
+            }
+          }
         }
     };
-
-    useEffect(() => {
-      // Check if the user is logged in
-      setIsUserLoggedIn(!!user); // Adjust here
-    }, [user, isSaved]);
 
     /**
      * Handles the closing of the alert dialog.
@@ -119,7 +130,7 @@ const MealCard = ({
                     <Box>
                         <Tag borderRadius="full" variant="solid" colorScheme="purple">{cuisine}</Tag>
                         <IconButton icon={<StarIcon />} boxSize={6} color={isSaved ? "#D69E2E" : "#718096"} _hover={{ color: "#D69E2E" }} 
-                            aria-label={isSaved ? "Unsave" : "Save"} bg="#DAF3A4" onClick={handleSave} isDisabled={isSaved}/>
+                            aria-label={isSaved ? "Unsave" : "Save"} bg="#DAF3A4" onClick={handleSave} />
                     </Box>
                 </Flex>
                 <AlertDialog isOpen={showLoginError} onClose={onClose}>

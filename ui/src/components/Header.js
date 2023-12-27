@@ -1,8 +1,13 @@
-import React from "react";
-import { Box, Flex, Heading, Avatar, Button } from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Box, Flex, Heading, Avatar, Button, HStack } from "@chakra-ui/react";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ReactComponent as RobotIcon } from './robot-chef.svg';
 import { auth } from './firebase'; 
+
+
+// Utility function to find the first non-null value
+const findFirstNonNull = (...values) => values.find(value => value !== null && value !== undefined);
+
 
 /**
  * Header component displays the application's header, including the logo, title, and user information.
@@ -10,12 +15,13 @@ import { auth } from './firebase';
  * @param {Object} props - React component props.
  * @returns {React.ReactNode} The Header component.
  */
-const Header = ({ setUserId }) => {
+const Header = ({ userIdProfile }) => {
   const location = useLocation();
-  const userId  = location.state || '';
+  // const userId  = location.state || '';
   const navigate = useNavigate();
-
-  setUserId(userId);
+  console.log(location.state)
+  const [userId, setUserId] = useState(findFirstNonNull(location.state, userIdProfile, ''));
+  console.log(userId, userIdProfile);
 
   const onLogout = async () => {
     try {
@@ -31,7 +37,7 @@ const Header = ({ setUserId }) => {
     <Flex align="center" justify="space-between" paddingX={6}>
       {/* Logo */}
       <Box height={"80px"}>
-        <Link href="/">
+        <Link href="/" to="/">
           <RobotIcon />
         </Link>
       </Box>
@@ -42,12 +48,14 @@ const Header = ({ setUserId }) => {
         {userId ? (
           // Display user information and logout button if the user is logged in
           <Flex align="center">
-            <Box marginRight={4}>
+            <HStack marginRight={4}>
+              <Link to={`/users/${userId}/profile`}>
               <Avatar size="sm" />
-            </Box>
+              </Link>
             <Button onClick={onLogout} colorScheme="red" size="sm">
               Logout
             </Button>
+            </HStack>
           </Flex>
         ) : (
           // Display login button if the user is not logged in
