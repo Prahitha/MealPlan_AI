@@ -28,6 +28,7 @@ import { MinusIcon, AddIcon, StarIcon } from "@chakra-ui/icons";
 import { useAuth } from "./AuthContext.js";
 import { auth, firestore } from './firebase';
 import { v4 as uuidv4 } from "uuid";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { doc, addDoc, setDoc, deleteDoc, collection } from "firebase/firestore";
 
 /**
@@ -54,16 +55,14 @@ const MealCard = ({
 }) => {
     
     const [isSaved, setIsSaved] = useState(false);
-    const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+    const [isUserLoggedIn, setIsUserLoggedIn] = useState(auth.currentUser);
     const [showLoginError, setShowLoginError] = useState(false);
-    const [mealId, setMealId] = useState();
+    const [mealId, setMealId] = useState(null);
+    // const [user, setUser] = useState(null);
     const authContext = useAuth;
-    const userId = user.user || user.uid;
-    const userVerified = auth.currentUser;
-
-    const collectionRef = collection(firestore, 'users', userId, 'profile');
-    // const user = firebase.auth().currentUser;
-
+    const location = useLocation();
+    const userId = location.state && location.state.user ? location.state.user : location.pathname.split("/")[2] || '';
+  
     const mealData = {
       mealType,
       cuisine,
@@ -74,10 +73,12 @@ const MealCard = ({
   };
 
     useEffect(() => {
+      console.log(user);
       // Check if the user is logged in
       setIsUserLoggedIn(!!user);
       if (user && !isSaved){
         setMealId(null);
+        console.log('Meal not saved yet')
       }
       console.log(mealId);
     }, [user, isSaved]);
@@ -93,7 +94,10 @@ const MealCard = ({
 
         let mealDocRef;
 
-        if (userVerified) {
+        if (auth.currentUser) {
+          console.log(userId);
+          const collectionRef = collection(firestore, 'users', userId, 'profile');
+
           if (isSaved) {
             mealDocRef = doc(collectionRef, mealId);
             await deleteDoc(mealDocRef);

@@ -32,6 +32,7 @@ export const Meals = ({ mealSuggestions, userId }) => {
                   templateColumns={`repeat(${meals.length > 2 ? 3 : meals.length}, 1fr)`}
                   gap={2}
                 >
+                  {console.log(meals)}
                   {/* Mapping through individual meals to display MealCard components */}
                   {meals.map(
                     (

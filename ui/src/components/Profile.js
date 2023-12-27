@@ -3,6 +3,7 @@ import { auth, firestore } from './firebase';
 import MealCard from './MealCard';
 import { getDocs, collection } from "firebase/firestore";
 import Header from "./Header";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChakraProvider, Stack, Grid, GridItem, Center } from "@chakra-ui/react";
 import { Meals } from "./Meals";
 
@@ -12,7 +13,8 @@ import { Meals } from "./Meals";
  * @returns {React.ReactNode} The Profile component.
  */
 const Profile = () => {
-  const user = auth.currentUser;
+  const location = useLocation();
+  const user = location.pathname.split("/")[2];
   const [savedMeals, setSavedMeals] = useState([]);
 
   useEffect(() => {
@@ -20,7 +22,7 @@ const Profile = () => {
       if (user) {
         try {
           // Assuming your meals are stored in a 'meals' collection under the user's profile
-          const collectionRef = collection(firestore, 'users', user.uid, 'profile');
+          const collectionRef = collection(firestore, 'users', user, 'profile');
           const mealsSnapshot = await getDocs(collectionRef);
           const mealsData = mealsSnapshot.docs.map(doc => doc.data());
           setSavedMeals(mealsData);

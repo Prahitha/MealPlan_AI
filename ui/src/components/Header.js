@@ -5,7 +5,7 @@ import { ReactComponent as RobotIcon } from './robot-chef.svg';
 import { auth } from './firebase'; 
 
 // Utility function to find the first non-null value
-const findFirstNonNull = (...values) => values.find(value => value !== null && value !== undefined);
+// const findFirstNonNull = (...values) => values.find(value => value !== null && value !== undefined);
 
 /**
  * Header component displays the application's header, including the logo, title, and user information.
@@ -18,12 +18,13 @@ const Header = ({ userIdProfile }) => {
   const navigate = useNavigate();
   
   // Use userIdProfile directly and set it as the initial state
-  const [userId, setUserId] = useState(findFirstNonNull(location.state, userIdProfile, ''));
+  const [userId, setUserId] = useState('');
 
   useEffect(() => {
     // Update userId state when userIdProfile prop changes
-    setUserId(userIdProfile || '');
-  }, [userIdProfile]);
+    const newUser = location.state && location.state.user ? location.state.user : location.pathname.split("/")[2] || '';
+    setUserId(newUser);
+  }, [location.state || userIdProfile]);
 
   const onLogout = async () => {
     try {

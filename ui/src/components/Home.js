@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import InputForm from "./InputForm";
 import Header from "./Header";
 import { ChakraProvider, Stack, Grid, GridItem } from "@chakra-ui/react";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Meals } from "./Meals";
 
 /**
@@ -13,6 +14,7 @@ import { Meals } from "./Meals";
 function Home() {
   const [mealSuggestions, setMealSuggestions] = useState([]);
   const [userId, setUserId] = useState('');
+  const location = useLocation();
 
   return (
     <ChakraProvider>
@@ -28,7 +30,7 @@ function Home() {
             {/* InputForm component for user input */}
             <InputForm onSubmit={setMealSuggestions} />
             {/* Meals component displaying meal suggestions */}
-            <Meals mealSuggestions={mealSuggestions} userId={userId} />
+            <Meals mealSuggestions={mealSuggestions} userId={location.state} />
           </Stack>
         </GridItem>
       </Grid>
