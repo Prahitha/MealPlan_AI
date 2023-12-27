@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,
   Flex,
   FormControl,
   FormErrorMessage,
-  FormHelperText,
   FormLabel,
   Grid,
   GridItem,
@@ -13,13 +11,18 @@ import {
   CheckboxGroup,
   Checkbox,
   Select,
-  Stack,
-  InputGroup,
-  InputRightElement,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import ImageUploader from "./ImageUploader";
 
+/**
+ * InputForm component is responsible for rendering the input form for user preferences
+ * and handling the submission of the form to generate meal suggestions.
+ *
+ * @param {Object} props - The component properties.
+ * @param {Function} props.onSubmit - Callback function to handle the form submission and meal suggestions generation.
+ * @returns {React.ReactNode} The InputForm component.
+ */
 const InputForm = ({onSubmit}) => {
 
     const [pantryItems, setPantryItems] = useState('');
@@ -30,7 +33,6 @@ const InputForm = ({onSubmit}) => {
     const [daysOfWeek, setDaysOfWeek] = useState([]);
     const [mealsForTheDay, setMealsForTheDay] = useState([]);
     const [cuisine, setCuisine] = useState('');
-    // const [mealSuggestions, setMealSuggestions] = useState([]);
     const [foodItems, setFoodItems] = useState([]);
 
     // Better FormControl: user can just type gibberish and it would still work right now
@@ -41,14 +43,21 @@ const InputForm = ({onSubmit}) => {
     //   console.log('mealSuggestions updated:', mealSuggestions);
     // }, [mealSuggestions]);
   
+    /**
+     * Callback function to handle received food items from the ImageUploader component.
+     *
+     * @param {Array} items - Array of food items recognized from the uploaded image.
+     */
     const onFoodItemsReceived = (items) => {
       const updatedPantryItems = [...pantryItems.split(','), ...items].join(', ');
       setPantryItems(updatedPantryItems);
       setFoodItems(items);
     };
   
-    const generateMealSuggestions = async (e) => {
-      // e.preventDefault();
+    /**
+     * Generates meal suggestions by sending a request to the server based on user preferences.
+     */
+    const generateMealSuggestions = async () => {
       try {
         const response = await axios.post('http://127.0.0.1:5000/generate_text', {
           pantry_items: pantryItems.split(',').map(item => item.trim()),
@@ -68,8 +77,13 @@ const InputForm = ({onSubmit}) => {
       }
     };
 
+    /**
+     * Handles the form submission by generating meal suggestions.
+     *
+     * @param {Event} e - The form submission event.
+     */
     const handleSubmit = (e) => {
-      // e.preventDefault();
+      e.preventDefault();
       // Pass formData to the onSubmit function
       generateMealSuggestions();
     };

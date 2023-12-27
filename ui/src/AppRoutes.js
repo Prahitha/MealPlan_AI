@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from './components/Login';
 import Profile from './components/Profile';
-import Signup from './components/SignUp';
+import SignUp from './components/SignUp';
 import Home from './components/Home';
 
 const AppRoutes = () => {
@@ -11,9 +11,9 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/" component={Home} />
-        <Route path="/signup" component={Signup} />
+        <Route path="/signup" component={SignUp} />
         <Route path="/login" component={Login} />
-        <Route path="/profile" component={Profile} />
+        <Route path="/users/:userId/profile" component={Profile} />
       </Routes>
     </Router>
   );

@@ -1,126 +1,142 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     Button,
-    Checkbox,
-    Container,
-    Divider,
+    Flex,
     FormControl,
-    FormLabel,
     Heading,
-    HStack,
     Input,
+    InputGroup,
+    InputLeftElement,
+    InputRightElement,
     Link,
     Stack,
-    Text,
-  } from '@chakra-ui/react';
-import {  signInWithEmailAndPassword   } from 'firebase/auth';
+    chakra,
+} from '@chakra-ui/react';
+import { FaUserAlt, FaLock } from "react-icons/fa";
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase';
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom';
 import { ReactComponent as RobotIcon } from './robot-chef.svg';
-import { PasswordField } from './PasswordField'
+// import { PasswordField } from './PasswordField';
 
+const CFaUserAlt = chakra(FaUserAlt);
+const CFaLock = chakra(FaLock);
+
+/**
+ * Login component is responsible for rendering the login form and handling user authentication.
+ *
+ * @returns {React.ReactNode} The Login component.
+ */
 const Login = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-       
+    const [showPassword, setShowPassword] = useState(false);
+    const [user, setUser] = useState();
+
+    const handleShowClick = () => setShowPassword(!showPassword);
+
+    /**
+     * Handles the login form submission and performs user authentication.
+     *
+     * @param {Event} e - The form submission event.
+     */
     const onLogin = (e) => {
         e.preventDefault();
         signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-            // Signed in
-            const user = userCredential.user;
-            navigate.push("/home")
-            console.log(user);
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorCode, errorMessage)
-        });
-       
-    }
- 
-    return(
-        <Container
-            maxW="lg"
-            py={{
-            base: '12',
-            md: '24',
-            }}
-            px={{
-            base: '0',
-            sm: '8',
-            }}
+            .then((userCredential) => {
+                // Signed in
+                const user = userCredential.user;
+                console.log(user);
+                setUser(user);
+                navigate('/', { state: { user: user.uid } });
+                // <Route exact path="/" element={<Home user={user} onLogout={handleLogout} />} />
+            })
+            .catch((e) => {
+                const errorCode = e.code;
+                const errorMessage = e.message;
+                console.log(errorCode, errorMessage);
+            });
+    };
+
+    return (
+        <Flex
+        flexDirection="column"
+        width="100wh"
+        height="100vh"
+        justifyContent="center"
+        alignItems="center"
         >
-            <Stack spacing="8">
-            <Stack spacing="6">
-                <RobotIcon />
-                <Stack
-                spacing={{
-                    base: '2',
-                    md: '3',
-                }}
-                textAlign="center"
-                >
-                <Heading
-                    size={{
-                    base: 'xs',
-                    md: 'sm',
-                    }}
-                >
-                    Log in to your account
-                </Heading>
-                <Text color="fg.muted">
-                    Don't have an account? <Link href="/signup">Sign up</Link>
-                </Text>
-                </Stack>
-            </Stack>
-            <Box
-                py={{
-                base: '0',
-                sm: '8',
-                }}
-                px={{
-                base: '4',
-                sm: '10',
-                }}
-                bg={{
-                base: 'transparent',
-                sm: 'bg.surface',
-                }}
-                boxShadow={{
-                base: 'none',
-                sm: 'md',
-                }}
-                borderRadius={{
-                base: 'none',
-                sm: 'xl',
-                }}
+        <Stack
+        flexDir="column"
+        mb="2"
+        justifyContent="center"
+        alignItems="center"
+        >
+        <Link href="/">
+          <RobotIcon />
+        </Link>
+        <Heading color="teal.400">Welcome</Heading>
+        <Box minW={{ base: "90%", md: "468px" }}>
+            <form>
+            <Stack
+                spacing={4}
+                p="1rem"
+                backgroundColor="whiteAlpha.900"
+                boxShadow="md"
             >
-                <Stack spacing="6">
-                <Stack spacing="5">
-                    <FormControl>
-                    <FormLabel htmlFor="email">Email</FormLabel>
-                    <Input id="email" type="email" required placeholder="Email address" onChange={(e)=>setEmail(e.target.value)} />
-                    </FormControl>
-                    <PasswordField />
-                </Stack>
-                <HStack justify="space-between">
-                    <Checkbox defaultChecked>Remember me</Checkbox>
-                    <Button variant="text" size="sm" onClick={onLogin}>
-                    Forgot password?
+                <FormControl>
+                <InputGroup>
+                    <InputLeftElement
+                    pointerEvents="none"
+                    children={<CFaUserAlt color="gray.300" />}
+                    />
+                    <Input id="email" type="email" required placeholder="Email address" onChange={(e) => setEmail(e.target.value)} />
+                </InputGroup>
+                </FormControl>
+                <FormControl>
+                <InputGroup>
+                    <InputLeftElement
+                    pointerEvents="none"
+                    color="gray.300"
+                    children={<CFaLock color="gray.300" />}
+                    />
+                    <Input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="Password"
+                    onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <InputRightElement width="4.5rem">
+                    <Button h="1.75rem" size="sm" onClick={handleShowClick}>
+                        {showPassword ? "Hide" : "Show"}
                     </Button>
-                </HStack>
-                <Stack spacing="6">
-                    <Button>Sign in</Button>
-                </Stack>
-                </Stack>
-            </Box>
+                    </InputRightElement>
+                </InputGroup>
+                </FormControl>
+                <Button
+                borderRadius={0}
+                type="submit"
+                variant="solid"
+                colorScheme="teal"
+                width="full"
+                onClick={onLogin}
+                >
+                Login
+                </Button>
             </Stack>
-        </Container>
-)
-}
+            </form>
+        </Box>
+        </Stack>
+        <Box>
+        New to us?{" "}
+        <Link color="teal.500" href="/signup">
+            Sign Up
+        </Link>
+        </Box>
+        </Flex>
+    );
+};
 
 export default Login;
