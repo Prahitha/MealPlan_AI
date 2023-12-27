@@ -20,9 +20,17 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { ReactComponent as RobotIcon } from './robot-chef.svg';
 import ErrorAlert from './ErrorAlert';
 
+// Chakra UI components with chakra() function
 const CFaUserAlt = chakra(FaUserAlt);
 const CFaLock = chakra(FaLock);
 
+/**
+ * SignUp component renders the sign-up form.
+ *
+ * @param {Object} props - React component props.
+ * @param {Function} props.onLoginSuccess - Function to be called on successful sign-up.
+ * @returns {React.ReactNode} The SignUp component.
+ */
 const SignUp = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
@@ -30,14 +38,22 @@ const SignUp = ({ onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState();
 
+  /**
+   * Toggles the visibility of the password input.
+   */
   const handleShowClick = () => setShowPassword(!showPassword);
 
+  /**
+   * Handles the sign-up form submission.
+   *
+   * @param {Event} e - The form submission event.
+   */
   const onSignUp = (e) => {
     e.preventDefault();
     if (!email || !password) {
-        setError('Email and password are required.');
-        return;
-      }
+      setError('Email and password are required.');
+      return;
+    }
 
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
@@ -53,10 +69,12 @@ const SignUp = ({ onLoginSuccess }) => {
       });
   };
 
+  /**
+   * Clears the error state.
+   */
   const clearError = () => {
     setError(null);
   };
-
 
   return (
     <Flex
@@ -84,9 +102,8 @@ const SignUp = ({ onLoginSuccess }) => {
               backgroundColor="whiteAlpha.900"
               boxShadow="md"
             >
-
-            {/* Display error if there is one */}
-            {error && <ErrorAlert message={error} onClose={clearError} />}
+              {/* Display error if there is one */}
+              {error && <ErrorAlert message={error} onClose={clearError} />}
 
               <FormControl>
                 <InputGroup>

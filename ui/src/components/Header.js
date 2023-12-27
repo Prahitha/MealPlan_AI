@@ -4,10 +4,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ReactComponent as RobotIcon } from './robot-chef.svg';
 import { auth } from './firebase'; 
 
-
 // Utility function to find the first non-null value
 const findFirstNonNull = (...values) => values.find(value => value !== null && value !== undefined);
-
 
 /**
  * Header component displays the application's header, including the logo, title, and user information.
@@ -17,11 +15,15 @@ const findFirstNonNull = (...values) => values.find(value => value !== null && v
  */
 const Header = ({ userIdProfile }) => {
   const location = useLocation();
-  // const userId  = location.state || '';
   const navigate = useNavigate();
-  console.log(location.state)
+  
+  // Use userIdProfile directly and set it as the initial state
   const [userId, setUserId] = useState(findFirstNonNull(location.state, userIdProfile, ''));
-  console.log(userId, userIdProfile);
+
+  useEffect(() => {
+    // Update userId state when userIdProfile prop changes
+    setUserId(userIdProfile || '');
+  }, [userIdProfile]);
 
   const onLogout = async () => {
     try {
@@ -50,11 +52,11 @@ const Header = ({ userIdProfile }) => {
           <Flex align="center">
             <HStack marginRight={4}>
               <Link to={`/users/${userId}/profile`}>
-              <Avatar size="sm" />
+                <Avatar size="sm" />
               </Link>
-            <Button onClick={onLogout} colorScheme="red" size="sm">
-              Logout
-            </Button>
+              <Button onClick={onLogout} colorScheme="red" size="sm">
+                Logout
+              </Button>
             </HStack>
           </Flex>
         ) : (
