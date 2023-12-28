@@ -75,6 +75,22 @@ MealPlan AI is a meal planning/suggestion tool powered by OpenAI API using the i
 
 <br/>
 
+## Firebase Setup
+
+- Authentication
+<p align="center">
+<img width="935" alt="Screenshot 2023-12-27 at 6 09 20 PM" src="https://github.com/Prahitha/MealPlan_AI/assets/44160152/66f8936e-59b2-4a0c-965d-58f87be959d6" />
+</p>
+
+- Firestore Database
+<p align="center">
+<img width="935" alt="Screenshot 2023-12-27 at 6 08 30 PM" src="https://github.com/Prahitha/MealPlan_AI/assets/44160152/27a53ea8-ca69-489c-8e00-73efd76196dc" />
+</p>
+<p align="center">
+<img width="935" alt="Screenshot 2023-12-28 at 1 07 27 AM" src="https://github.com/Prahitha/MealPlan_AI/assets/44160152/fe0fc08f-8373-453a-8274-185094ac7dcd" />
+</p>
+
+
 ## Notes
 
 OpenAI API does not always give the output in the format requested in the prompt which makes it harder to structure the JSON properly. The `process_output` function in `backend/app.py` must be flexible to accomodate such outputs too.
